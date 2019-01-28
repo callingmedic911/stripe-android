@@ -16,9 +16,9 @@ import static com.stripe.android.model.StripeJsonUtils.optString;
  */
 public class CustomerSource extends StripeJsonModel implements StripePaymentSource {
 
-    private StripePaymentSource mStripePaymentSource;
+    @NonNull private final StripePaymentSource mStripePaymentSource;
 
-    private CustomerSource(StripePaymentSource paymentSource) {
+    private CustomerSource(@NonNull StripePaymentSource paymentSource) {
         mStripePaymentSource = paymentSource;
     }
 
@@ -92,11 +92,13 @@ public class CustomerSource extends StripeJsonModel implements StripePaymentSour
         }
 
         String objectString = optString(jsonObject, "object");
-        StripePaymentSource sourceObject = null;
+        final StripePaymentSource sourceObject;
         if (Card.VALUE_CARD.equals(objectString)) {
             sourceObject = Card.fromJson(jsonObject);
         } else if (Source.VALUE_SOURCE.equals(objectString)) {
             sourceObject = Source.fromJson(jsonObject);
+        } else {
+            sourceObject = null;
         }
 
         if (sourceObject == null) {

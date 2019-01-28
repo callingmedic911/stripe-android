@@ -133,29 +133,29 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     private static final String FIELD_ID = "id";
     private static final String FIELD_TOKENIZATION_METHOD = "tokenization_method";
 
-    private String number;
-    private String cvc;
+    @Nullable private String number;
+    @Nullable private String cvc;
     private Integer expMonth;
     private Integer expYear;
-    private String name;
-    private String addressLine1;
-    private String addressLine1Check;
-    private String addressLine2;
-    private String addressCity;
-    private String addressState;
-    private String addressZip;
-    private String addressZipCheck;
-    private String addressCountry;
+    @Nullable private String name;
+    @Nullable private String addressLine1;
+    @Nullable private String addressLine1Check;
+    @Nullable private String addressLine2;
+    @Nullable private String addressCity;
+    @Nullable private String addressState;
+    @Nullable private String addressZip;
+    @Nullable private String addressZipCheck;
+    @Nullable private String addressCountry;
     @Size(4) private String last4;
     @CardBrand private String brand;
     @FundingType private String funding;
-    private String fingerprint;
-    private String country;
-    private String currency;
-    private String customerId;
+    @Nullable private String fingerprint;
+    @Nullable private String country;
+    @Nullable private String currency;
+    @Nullable private String customerId;
     private String cvcCheck;
-    private String id;
-    @NonNull private List<String> loggingTokens = new ArrayList<>();
+    @Nullable private String id;
+    @NonNull private final List<String> loggingTokens = new ArrayList<>();
     @Nullable private String tokenizationMethod;
     @Nullable private Map<String, String> metadata;
 
@@ -163,8 +163,8 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * Builder class for a {@link Card} model.
      */
     public static class Builder {
-        private final String number;
-        private final String cvc;
+        @Nullable private final String number;
+        @Nullable private final String cvc;
         private final Integer expMonth;
         private final Integer expYear;
         private String name;
@@ -197,10 +197,10 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
          * @param cvc the card CVC number
          */
         public Builder(
-                String number,
+                @Nullable String number,
                 @IntRange(from = 1, to = 12) Integer expMonth,
                 @IntRange(from = 0) Integer expYear,
-                String cvc) {
+                @Nullable String cvc) {
             this.number = number;
             this.expMonth = expMonth;
             this.expYear = expYear;
@@ -332,6 +332,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
          *
          * @return the newly created {@link Card} object
          */
+        @NonNull
         public Card build() {
             return new Card(this);
         }
@@ -401,7 +402,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * or the JSON is invalid.
      */
     @Nullable
-    public static Card fromString(String jsonString) {
+    public static Card fromString(@NonNull String jsonString) {
         try {
             JSONObject jsonObject = new JSONObject(jsonString);
             return fromJson(jsonObject);
@@ -411,7 +412,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     }
 
     @Nullable
-    public static Card fromJson(JSONObject jsonObject) {
+    public static Card fromJson(@Nullable JSONObject jsonObject) {
         if (jsonObject == null || !VALUE_CARD.equals(jsonObject.optString(FIELD_OBJECT))) {
             return null;
         }
@@ -431,29 +432,28 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         }
 
         // Note that we'll never get the CVC or card number in JSON, so those values are null
-        final Builder builder = new Builder(null, expMonth, expYear, null);
-        builder.addressCity(optString(jsonObject, FIELD_ADDRESS_CITY));
-        builder.addressLine1(optString(jsonObject, FIELD_ADDRESS_LINE1));
-        builder.addressLine1Check(optString(jsonObject, FIELD_ADDRESS_LINE1_CHECK));
-        builder.addressLine2(optString(jsonObject, FIELD_ADDRESS_LINE2));
-        builder.addressCountry(optString(jsonObject, FIELD_ADDRESS_COUNTRY));
-        builder.addressState(optString(jsonObject, FIELD_ADDRESS_STATE));
-        builder.addressZip(optString(jsonObject, FIELD_ADDRESS_ZIP));
-        builder.addressZipCheck(optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK));
-        builder.brand(asCardBrand(optString(jsonObject, FIELD_BRAND)));
-        builder.country(optCountryCode(jsonObject, FIELD_COUNTRY));
-        builder.customer(optString(jsonObject, FIELD_CUSTOMER));
-        builder.currency(optCurrency(jsonObject, FIELD_CURRENCY));
-        builder.cvcCheck(optString(jsonObject, FIELD_CVC_CHECK));
-        builder.funding(asFundingType(optString(jsonObject, FIELD_FUNDING)));
-        builder.fingerprint(optString(jsonObject, FIELD_FINGERPRINT));
-        builder.id(optString(jsonObject, FIELD_ID));
-        builder.last4(optString(jsonObject, FIELD_LAST4));
-        builder.name(optString(jsonObject, FIELD_NAME));
-        builder.tokenizationMethod(optString(jsonObject, FIELD_TOKENIZATION_METHOD));
-        builder.metadata(optHash(jsonObject, FIELD_METADATA));
-
-        return builder.build();
+        return new Builder(null, expMonth, expYear, null)
+                .addressCity(optString(jsonObject, FIELD_ADDRESS_CITY))
+                .addressLine1(optString(jsonObject, FIELD_ADDRESS_LINE1))
+                .addressLine1Check(optString(jsonObject, FIELD_ADDRESS_LINE1_CHECK))
+                .addressLine2(optString(jsonObject, FIELD_ADDRESS_LINE2))
+                .addressCountry(optString(jsonObject, FIELD_ADDRESS_COUNTRY))
+                .addressState(optString(jsonObject, FIELD_ADDRESS_STATE))
+                .addressZip(optString(jsonObject, FIELD_ADDRESS_ZIP))
+                .addressZipCheck(optString(jsonObject, FIELD_ADDRESS_ZIP_CHECK))
+                .brand(asCardBrand(optString(jsonObject, FIELD_BRAND)))
+                .country(optCountryCode(jsonObject, FIELD_COUNTRY))
+                .customer(optString(jsonObject, FIELD_CUSTOMER))
+                .currency(optCurrency(jsonObject, FIELD_CURRENCY))
+                .cvcCheck(optString(jsonObject, FIELD_CVC_CHECK))
+                .funding(asFundingType(optString(jsonObject, FIELD_FUNDING)))
+                .fingerprint(optString(jsonObject, FIELD_FINGERPRINT))
+                .id(optString(jsonObject, FIELD_ID))
+                .last4(optString(jsonObject, FIELD_LAST4))
+                .name(optString(jsonObject, FIELD_NAME))
+                .tokenizationMethod(optString(jsonObject, FIELD_TOKENIZATION_METHOD))
+                .metadata(optHash(jsonObject, FIELD_METADATA))
+                .build();
     }
 
     /**
@@ -666,13 +666,14 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      *
      * @return {@code true} if valid, {@code false} otherwise.
      */
-    boolean validateExpYear(Calendar now) {
+    boolean validateExpYear(@NonNull Calendar now) {
         return expYear != null && !ModelUtils.hasYearPassed(expYear, now);
     }
 
     /**
      * @return the {@link #number} of this card
      */
+    @Nullable
     public String getNumber() {
         return number;
     }
@@ -760,6 +761,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @return the cardholder {@link #name} for this card
      */
+    @Nullable
     public String getName() {
         return name;
     }
@@ -767,13 +769,14 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @param name sets the cardholder {@link #name} for this card
      */
-    public void setName(String name) {
+    public void setName(@Nullable String name) {
         this.name = name;
     }
 
     /**
      * @return the {@link #addressLine1} of this card
      */
+    @Nullable
     public String getAddressLine1() {
         return addressLine1;
     }
@@ -781,13 +784,14 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @param addressLine1 sets the {@link #addressLine1} for this card
      */
-    public void setAddressLine1(String addressLine1) {
+    public void setAddressLine1(@Nullable String addressLine1) {
         this.addressLine1 = addressLine1;
     }
 
     /**
      * @return the {@link #addressLine2} of this card
      */
+    @Nullable
     public String getAddressLine2() {
         return addressLine2;
     }
@@ -795,13 +799,14 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @param addressLine2 sets the {@link #addressLine2} for this card
      */
-    public void setAddressLine2(String addressLine2) {
+    public void setAddressLine2(@Nullable String addressLine2) {
         this.addressLine2 = addressLine2;
     }
 
     /**
      * @return the {@link #addressCity} for this card
      */
+    @Nullable
     public String getAddressCity() {
         return addressCity;
     }
@@ -809,13 +814,14 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @param addressCity sets the {@link #addressCity} for this card
      */
-    public void setAddressCity(String addressCity) {
+    public void setAddressCity(@Nullable String addressCity) {
         this.addressCity = addressCity;
     }
 
     /**
      * @return the {@link #addressZip} of this card
      */
+    @Nullable
     public String getAddressZip() {
         return addressZip;
     }
@@ -823,13 +829,14 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @param addressZip sets the {@link #addressZip} for this card
      */
-    public void setAddressZip(String addressZip) {
+    public void setAddressZip(@Nullable String addressZip) {
         this.addressZip = addressZip;
     }
 
     /**
      * @return the {@link #addressState} of this card
      */
+    @Nullable
     public String getAddressState() {
         return addressState;
     }
@@ -837,13 +844,14 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @param addressState sets the {@link #addressState} for this card
      */
-    public void setAddressState(String addressState) {
+    public void setAddressState(@Nullable String addressState) {
         this.addressState = addressState;
     }
 
     /**
      * @return the {@link #addressCountry} of this card
      */
+    @Nullable
     public String getAddressCountry() {
         return addressCountry;
     }
@@ -851,13 +859,14 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @param addressCountry sets the {@link #addressCountry} for this card
      */
-    public void setAddressCountry(String addressCountry) {
+    public void setAddressCountry(@Nullable String addressCountry) {
         this.addressCountry = addressCountry;
     }
 
     /**
      * @return the {@link #currency} of this card. Only supported for Managed accounts.
      */
+    @Nullable
     public String getCurrency() {
         return currency;
     }
@@ -865,7 +874,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @param currency sets the {@link #currency} of this card. Only supported for Managed accounts.
      */
-    public void setCurrency(String currency) {
+    public void setCurrency(@Nullable String currency) {
         this.currency = currency;
     }
 
@@ -888,6 +897,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
      * @return the {@link #last4} digits of this card. Sets the value based on the {@link #number}
      * if it has not already been set.
      */
+    @Nullable
     public String getLast4() {
         if (!StripeTextUtils.isBlank(last4)) {
             return last4;
@@ -931,6 +941,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @return the {@link #fingerprint} of this card
      */
+    @Nullable
     public String getFingerprint() {
         return fingerprint;
     }
@@ -947,6 +958,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @return the {@link #country} of this card
      */
+    @Nullable
     public String getCountry() {
         return country;
     }
@@ -954,6 +966,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     /**
      * @return the {@link #id} of this card
      */
+    @Nullable
     @Override
     public String getId() {
         return id;
@@ -997,7 +1010,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
     @NonNull
     @Override
     public JSONObject toJson() {
-        JSONObject object = new JSONObject();
+        final JSONObject object = new JSONObject();
         putStringIfNotNull(object, FIELD_NAME, name);
         putStringIfNotNull(object, FIELD_ADDRESS_CITY, addressCity);
         putStringIfNotNull(object, FIELD_ADDRESS_COUNTRY, addressCountry);
@@ -1068,7 +1081,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         }
     }
 
-    boolean validateExpiryDate(Calendar now) {
+    boolean validateExpiryDate(@NonNull Calendar now) {
         if (!validateExpMonth()) {
             return false;
         }
@@ -1078,7 +1091,7 @@ public class Card extends StripeJsonModel implements StripePaymentSource {
         return !ModelUtils.hasMonthPassed(expYear, expMonth, now);
     }
 
-    private Card(Builder builder) {
+    private Card(@NonNull Builder builder) {
         this.number = StripeTextUtils.nullIfBlank(normalizeCardNumber(builder.number));
         this.expMonth = builder.expMonth;
         this.expYear = builder.expYear;

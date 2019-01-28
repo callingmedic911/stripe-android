@@ -2,6 +2,7 @@ package com.stripe.android.model;
 
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringDef;
 
@@ -37,24 +38,25 @@ public class Token implements StripePaymentSource {
 
     private static final String FIELD_TYPE = "type";
     private static final String FIELD_USED = "used";
-    private final String mId;
-    private final String mType;
+
+    @NonNull private final String mId;
+    @NonNull private final String mType;
     private final Date mCreated;
     private final boolean mLivemode;
     private final boolean mUsed;
-    private final BankAccount mBankAccount;
-    private final Card mCard;
+    @Nullable private final BankAccount mBankAccount;
+    @Nullable private final Card mCard;
 
     /**
      * Constructor that should not be invoked in your code.  This is used by Stripe to
      * create tokens using a Stripe API response.
      */
     public Token(
-            String id,
+            @NonNull String id,
             boolean livemode,
-            Date created,
-            Boolean used,
-            Card card) {
+            @NonNull Date created,
+            boolean used,
+            @Nullable Card card) {
         mId = id;
         mType = TYPE_CARD;
         mCreated = created;
@@ -69,17 +71,17 @@ public class Token implements StripePaymentSource {
      * create tokens using a Stripe API response.
      */
     public Token(
-            String id,
+            @NonNull String id,
             boolean livemode,
-            Date created,
-            Boolean used,
-            BankAccount bankAccount) {
+            @NonNull Date created,
+            @Nullable Boolean used,
+            @NonNull BankAccount bankAccount) {
         mId = id;
         mType = TYPE_BANK_ACCOUNT;
         mCreated = created;
         mLivemode = livemode;
         mCard = null;
-        mUsed = used;
+        mUsed = Boolean.TRUE.equals(used);
         mBankAccount = bankAccount;
     }
 
@@ -88,18 +90,17 @@ public class Token implements StripePaymentSource {
      * create tokens using a Stripe API response.
      */
     public Token(
-            String id,
-            String type,
+            @NonNull String id,
+            @NonNull String type,
             boolean livemode,
-            Date created,
-            Boolean used
-    ) {
+            @NonNull Date created,
+            @Nullable Boolean used) {
         mId = id;
         mType = type;
         mCreated = created;
         mCard = null;
         mBankAccount = null;
-        mUsed = used;
+        mUsed = Boolean.TRUE.equals(used);
         mLivemode = livemode;
     }
 
@@ -113,6 +114,7 @@ public class Token implements StripePaymentSource {
     /**
      * @return the {@link #mId} of this token
      */
+    @Nullable
     @Override
     public String getId() {
         return mId;
@@ -183,9 +185,9 @@ public class Token implements StripePaymentSource {
         if (tokenId == null || createdTimeStamp == null || liveMode == null) {
             return null;
         }
-        Date date = new Date(createdTimeStamp * 1000);
+        final Date date = new Date(createdTimeStamp * 1000);
 
-        Token token = null;
+        final Token token;
         if (Token.TYPE_BANK_ACCOUNT.equals(tokenType)) {
             JSONObject bankAccountObject = jsonObject.optJSONObject(FIELD_BANK_ACCOUNT);
             if (bankAccountObject == null) {
@@ -199,9 +201,11 @@ public class Token implements StripePaymentSource {
                 return null;
             }
             Card card = Card.fromJson(cardObject);
-            token = new Token(tokenId, liveMode, date, used, card);
+            token = new Token(tokenId, liveMode, date, Boolean.TRUE.equals(used), card);
         } else if (Token.TYPE_PII.equals(tokenType) || Token.TYPE_ACCOUNT.equals(tokenType)) {
             token = new Token(tokenId, tokenType, liveMode, date, used);
+        } else {
+            token = null;
         }
         return token;
     }
@@ -215,7 +219,7 @@ public class Token implements StripePaymentSource {
      */
     @Nullable
     @TokenType
-    static String asTokenType(@Nullable String possibleTokenType) {
+    private static String asTokenType(@Nullable String possibleTokenType) {
         if (possibleTokenType == null || TextUtils.isEmpty(possibleTokenType.trim())) {
             return null;
         }

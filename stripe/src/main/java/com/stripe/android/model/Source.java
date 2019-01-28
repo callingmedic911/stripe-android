@@ -182,6 +182,7 @@ public class Source extends StripeJsonModel implements StripePaymentSource {
         mUsage = usage;
     }
 
+    @Nullable
     @Override
     public String getId() {
         return mId;

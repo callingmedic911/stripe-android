@@ -2,6 +2,7 @@ package com.stripe.android.model;
 
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.Calendar;
@@ -32,7 +33,7 @@ class ModelUtils {
      *  {@code false} otherwise.
      */
     @SuppressWarnings("WrongConstant")
-    static boolean hasMonthPassed(int year, int month, Calendar now) {
+    static boolean hasMonthPassed(int year, int month, @NonNull Calendar now) {
         if (hasYearPassed(year, now)) {
             return true;
         }
@@ -50,12 +51,12 @@ class ModelUtils {
      * @return {@code true} if the input year has passed the year of the specified current time
      *  {@code false} otherwise.
      */
-    static boolean hasYearPassed(int year, Calendar now) {
+    static boolean hasYearPassed(int year, @NonNull Calendar now) {
         int normalized = normalizeYear(year, now);
         return normalized < now.get(Calendar.YEAR);
     }
 
-    static int normalizeYear(int year, Calendar now)  {
+    static int normalizeYear(int year, @NonNull Calendar now)  {
         if (year < 100 && year >= 0) {
             String currentYear = String.valueOf(now.get(Calendar.YEAR));
             String prefix = currentYear.substring(0, currentYear.length() - 2);
